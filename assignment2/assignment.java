@@ -5,16 +5,13 @@ import java.util.Scanner;
 interface Bank{
 	final int initBal = 10000;
 	final int minBal = 5000;
-	static void errorMessage(String ch) {
-		System.out.println(ch);
-	}
-	
+
 	static void dispMessage() {
 		System.out.println("Transaction Successful");
 	}
 	void deposit(int num);
 	void checkbalance();
-	void withdraw(int var);
+	void withdraw(int var) throws InsufficientBalance;
 }
 
 class userChoice implements Bank{
@@ -41,10 +38,9 @@ class userChoice implements Bank{
 	}
 
 	@Override
-	public void withdraw(int var) {
+	public void withdraw(int var) throws InsufficientBalance {
 		if(userChoice.bal < var) {
-			Bank.errorMessage("Insufficient Balance, Withdraw attempt failed");
-			System.exit(0);
+			throw new InsufficientBalance("Insufficient Balance, Withdraw attempt failed");
 		}
 		else {
 			userChoice.bal -= var;
@@ -53,7 +49,7 @@ class userChoice implements Bank{
 	}	
 	
 	
-	public void checkOption(byte ch) {
+	public void checkOption(byte ch) throws InsufficientBalance {
 		int var,temp ;
 		System.out.println("Enter your choice- 1.Withdraw");
 		System.out.println("2. deposit \n 3. Check balance");
@@ -63,11 +59,14 @@ class userChoice implements Bank{
 			System.out.println("enter amount");
 			var = scan.nextInt();
 			if(ch==1 && var>Bank.minBal) {
-				Bank.errorMessage("The limit is 5000, Withdraw attempt failed");
-				break;
-			}
-			else
-				withdraw(var);
+				throw new InsufficientBalance("The limit is 5000, Withdraw attempt failed");
+			} else
+				try {
+					withdraw(var);
+				} catch (InsufficientBalance e) {
+					// TODO Auto-generated catch block
+					System.out.println(e.getMessage());
+				}
 			break;
 		case 2 :
 			System.out.println("enter amount");
@@ -78,7 +77,7 @@ class userChoice implements Bank{
 			this.checkbalance();
 			break;
 		default:
-			Bank.errorMessage("enter vaid option");
+			throw new InsufficientBalance("enter vaid option");
 			
 			
 			
@@ -101,7 +100,12 @@ public class assignment {
 		
 		userChoice ch = new userChoice();
 		while(var.equalsIgnoreCase("y")) {
-			ch.checkOption(choice);
+			try {
+				ch.checkOption(choice);
+			} catch (InsufficientBalance e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());;
+			}
 			System.out.println("enter y to continue,  n to exit");
 			var=scan.next();
 		}
@@ -109,6 +113,6 @@ public class assignment {
 				
 		
 		
-	}
+	}	
 
 }
